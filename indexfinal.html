@@ -369,14 +369,8 @@
                 <label for="signupPassword">Password:</label>
                 <input type="password" id="signupPassword" placeholder="Choose a password (min 6 characters)">
             </div>
-            <div class="form-group">
-                <label for="signupUserType">Account Type:</label>
-                <select id="signupUserType">
-                    <option value="student">Student</option>
-                    <option value="secretary">Secretary</option>
-                    <option value="management">Management</option>
-                </select>
-            </div>
+            <input type="hidden" id="signupUserType" value="student">
+
             <button class="btn" onclick="signup()">Sign Up</button>
             <p style="text-align: center; margin-top: 15px;">
                 Already have an account? <a href="#" onclick="event.preventDefault(); showLogin();" style="color: #667eea; text-decoration: none;">Login</a>
@@ -963,4 +957,5 @@
 </body>
 
 </html>
+
 
