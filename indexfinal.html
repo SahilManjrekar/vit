@@ -486,98 +486,37 @@
         }
 
         async function signup() {
-            const username = document.getElementById('signupUsername').value.trim();
-            const email = document.getElementById('signupEmail').value.trim();
-            const password = document.getElementById('signupPassword').value;
-            const userType = document.getElementById('signupUserType').value;
-            const errorDiv = document.getElementById('signupError');
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const username = document.getElementById('signupUsername').value;
 
-            // Validation
-            if (!username || !email || !password) {
-                errorDiv.innerHTML = '<div class="error-message">Please fill in all fields</div>';
-                return;
-            }
+    const { data: user, error } = await supabase.auth.signUp({
+        email,
+        password
+    });
 
-            if (password.length < 6) {
-                errorDiv.innerHTML = '<div class="error-message">Password must be at least 6 characters</div>';
-                return;
-            }
+    if (error) {
+        showError('Signup failed: ' + error.message);
+        return;
+    }
 
-            if (!email.includes('@')) {
-                errorDiv.innerHTML = '<div class="error-message">Please enter a valid email</div>';
-                return;
-            }
+    // Always student
+    const { error: profileError } = await supabase.from('profiles').insert({
+        id: user.user.id,
+        username,
+        email,
+        user_type: 'student'  // 🔥 fixed role
+    });
 
-            console.log('Signing up with:', { username, email, userType });
+    if (profileError) {
+        showError('Profile creation failed: ' + profileError.message);
+        return;
+    }
 
-            try {
-                // Check if email already exists
-                const { data: existingUser } = await supabase
-                    .from('profiles')
-                    .select('email')
-                    .eq('email', email)
-                    .single();
+    showSuccess('Signup successful! You are registered as a Student.');
+    showLogin();
+}
 
-                if (existingUser) {
-                    errorDiv.innerHTML = '<div class="warning-message">This email is already registered. Please login instead.</div>';
-                    return;
-                }
-
-                // Sign up with metadata
-                const { data, error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: {
-                            username: username,
-                            user_type: userType
-                        }
-                    }
-                });
-
-                if (error) {
-                    if (error.message.includes('already registered')) {
-                        errorDiv.innerHTML = '<div class="warning-message">This email is already registered. Please login instead.</div>';
-                        return;
-                    }
-                    throw error;
-                }
-
-                console.log('Signup successful:', data);
-
-                // Wait for trigger to complete
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                // Verify profile was created
-                const { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', data.user.id)
-                    .single();
-
-                console.log('Profile created:', profile);
-
-                if (profileError) {
-                    console.error('Profile error:', profileError);
-                }
-
-                hideModal('signupModal');
-                showSuccess('Account created successfully! You can now login.');
-                
-                // Auto-fill login
-                document.getElementById('loginEmail').value = email;
-                showLogin();
-                
-                // Clear inputs
-                document.getElementById('signupUsername').value = '';
-                document.getElementById('signupEmail').value = '';
-                document.getElementById('signupPassword').value = '';
-                errorDiv.innerHTML = '';
-            } catch (error) {
-                console.error('Signup error:', error);
-                errorDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
-            }
-        }
 
         async function logout() {
             await supabase.auth.signOut();
@@ -1024,3 +963,4 @@
 </body>
 
 </html>
+
