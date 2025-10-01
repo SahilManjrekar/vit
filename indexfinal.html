@@ -697,40 +697,32 @@
             }).join('');
         }
 
-        async function enrollEvent(eventId, fee) {
-            if (!currentUserProfile) {
-                showError('Please login to enroll');
-                return;
+       async function enrollEvent(eventId, eventName) {
+    console.log("Trying to enroll:", currentUser);
+
+    const { data, error } = await supabase
+        .from('enrollments')
+        .insert([
+            {
+                event_id: eventId,
+                user_id: currentUser.id,
+                payment_status: 'free',
+                amount: 0
             }
+        ])
+        .select();
 
-            try {
-                const paymentStatus = fee > 0 ? 'pending' : 'free';
-                const qrData = {
-                    event_id: eventId,
-                    user_id: currentUserProfile.id,
-                    timestamp: new Date().toISOString()
-                };
+    if (error) {
+        console.error("Enrollment failed:", error.message, error.details);
+        showError("Enrollment failed: " + error.message);
+        return;
+    }
 
-                const { error } = await supabase
-                    .from('enrollments')
-                    .insert([{
-                        event_id: eventId,
-                        user_id: currentUserProfile.id,
-                        payment_status: paymentStatus,
-                        amount: fee,
-                        qr_code_data: qrData
-                    }]);
+    console.log("Enrollment success:", data);
+    showSuccess("Enrolled successfully in " + eventName);
+    loadEvents();
+}
 
-                if (error) throw error;
-
-                await logActivity('Student enrolled', `Enrolled in event`);
-                showSuccess('Enrolled successfully!');
-                loadEvents();
-                loadEnrolledEvents();
-            } catch (error) {
-                showError(error.message);
-            }
-        }
 
         async function unenrollEvent(eventId) {
             try {
@@ -1030,4 +1022,5 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>
