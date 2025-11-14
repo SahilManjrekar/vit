@@ -759,23 +759,20 @@ function viewDoc(url){
   window.open(url,'_blank');
 }
 
-async function reviewDoc(id, status) {
-  let remark = '';
-  if (status === 'approved' || status === 'rejected') {
-    remark = prompt(`Enter remark for this document (optional):`, '');
-  }
-
-
+// -------------------- DOCUMENT REVIEW SYSTEM (FIXED) --------------------
 
 let currentReviewDocId = null;
 
 function reviewDoc(id, status) {
-  // open modal for remark entry
   currentReviewDocId = id;
+
   document.getElementById('remarkModal').dataset.status = status;
-  
-  const docInfo = document.getElementById('remarkDocInfo');
-  docInfo.innerHTML = `You are about to <b>${status.toUpperCase()}</b> this document.<br>Optionally add a remark below.`;
+
+  const info = document.getElementById('remarkDocInfo');
+  info.innerHTML = `
+    You are about to <b>${status.toUpperCase()}</b> this document.<br>
+    Optionally add a remark below.
+  `;
 
   document.getElementById('remarkText').value = '';
   showModal('remarkModal');
@@ -783,54 +780,35 @@ function reviewDoc(id, status) {
 
 async function submitRemark(forcedStatus = null) {
   const id = currentReviewDocId;
-  const status = forcedStatus || document.getElementById('remarkModal').dataset.status;
   const remark = document.getElementById('remarkText').value.trim();
+  const status = forcedStatus || document.getElementById('remarkModal').dataset.status;
 
   if (!id || !status) {
-    showToast('Error: Missing document details', 'error');
+    showToast("Missing document details", "error");
     return;
   }
 
   const updateData = {
     status,
+    remark: remark || null,
     reviewed_by: currentUserProfile.id,
-    reviewed_at: new Date(),
-    remark: remark || null
+    reviewed_at: new Date().toISOString()
   };
 
   const { error } = await supabase
-    .from('document_verifications')
+    .from("document_verifications")
     .update(updateData)
-    .eq('id', id);
+    .eq("id", id);
 
   if (error) {
-    showToast(error.message, 'error');
+    showToast(error.message, "error");
   } else {
-    showToast(`Document ${status} successfully`, 'success');
-    hideModal('remarkModal');
+    showToast(`Document ${status}`, "success");
+    hideModal("remarkModal");
     loadVerificationList();
   }
-}
 
-
-
-  const updateData = {
-    status,
-    reviewed_by: currentUserProfile.id,
-    reviewed_at: new Date(),
-    remark: remark || null
-  };
-
-  const { error } = await supabase
-    .from('document_verifications')
-    .update(updateData)
-    .eq('id', id);
-
-  if (error) showToast(error.message, 'error');
-  else {
-    showToast(`Marked ${status}`, 'success');
-    loadVerificationList();
-  }
+  currentReviewDocId = null;
 }
 
 
