@@ -619,10 +619,14 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  window.supabase = { createClient };
+</script>
+
    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
-    <script>
+    <script type="module">
         // CONFIGURATION
         const SUPABASE_URL = 'https://fzblkbvyfdqhfuqcnwwm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6YmxrYnZ5ZmRxaGZ1cWNud3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4OTg0NjIsImV4cCI6MjA3NTQ3NDQ2Mn0.esfVTNiOYlpDgYQnQWQ4w8-uq6_wd_tgbskvWodFUEY';
