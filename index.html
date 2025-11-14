@@ -620,7 +620,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
     <script>
         // CONFIGURATION
         const SUPABASE_URL = 'https://fzblkbvyfdqhfuqcnwwm.supabase.co';
@@ -1218,12 +1219,13 @@ const verificationTab=document.getElementById('verificationTab');
                     enrollments.forEach(enrollment => {
                         const qrDiv = document.getElementById(`qr-${enrollment.id}`);
                         if (qrDiv && enrollment.qr_code_data) {
-                            qrDiv.innerHTML = '';
-                            new QRCode(qrDiv, {
-                                text: JSON.stringify(enrollment.qr_code_data),
-                                width: 200,
-                                height: 200
-                            });
+                           qrDiv.innerHTML = "";
+const qr = new QRious({
+    element: qrDiv,
+    value: JSON.stringify(enrollment.qr_code_data),
+    size: 200
+});
+
                         }
                     });
                 }, 100);
